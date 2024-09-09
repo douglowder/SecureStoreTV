@@ -1,0 +1,56 @@
+diff --git a/node_modules/expo-secure-store/expo-module.config.json b/node_modules/expo-secure-store/expo-module.config.json
+index fbb1757552..28a0c919c4 100644
+--- a/node_modules/expo-secure-store/expo-module.config.json
++++ b/node_modules/expo-secure-store/expo-module.config.json
+@@ -1,6 +1,6 @@
+ {
+-  "platforms": ["ios", "android"],
+-  "ios": {
++  "platforms": ["apple", "android"],
++  "apple": {
+     "modules": ["SecureStoreModule"]
+   },
+   "android": {
+diff --git a/node_modules/expo-secure-store/ios/ExpoSecureStore.podspec b/node_modules/expo-secure-store/ios/ExpoSecureStore.podspec
+index 60e7f63873..5d008b9af7 100644
+--- a/node_modules/expo-secure-store/ios/ExpoSecureStore.podspec
++++ b/node_modules/expo-secure-store/ios/ExpoSecureStore.podspec
+@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
+   s.license        = package['license']
+   s.author         = package['author']
+   s.homepage       = package['homepage']
+-  s.platform       = :ios, '13.4'
++  s.platforms      = { :ios => '13.4', :tvos => '13.4' }
+   s.swift_version  = '5.4'
+   s.source         = { git: 'https://github.com/expo/expo.git' }
+   s.static_framework = true
+diff --git a/node_modules/expo-secure-store/ios/SecureStoreModule.swift b/node_modules/expo-secure-store/ios/SecureStoreModule.swift
+index 2052bb63cb..787f9ac57d 100644
+--- a/node_modules/expo-secure-store/ios/SecureStoreModule.swift
++++ b/node_modules/expo-secure-store/ios/SecureStoreModule.swift
+@@ -1,5 +1,7 @@
+ import ExpoModulesCore
++#if !os(tvOS)
+ import LocalAuthentication
++#endif
+ import Security
+ 
+ public final class SecureStoreModule: Module {
+@@ -51,6 +53,9 @@ public final class SecureStoreModule: Module {
+     }
+ 
+     Function("canUseBiometricAuthentication") {() -> Bool in
++      #if os(tvOS)
++      return false
++      #else
+       let context = LAContext()
+       var error: NSError?
+       let isBiometricsSupported: Bool = context.canEvaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics, error: &error)
+@@ -59,6 +64,7 @@ public final class SecureStoreModule: Module {
+         return false
+       }
+       return isBiometricsSupported
++      #endif
+     }
+   }
+ 
